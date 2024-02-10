@@ -47,8 +47,14 @@ class dust:
         
     def updatePos(self, deltaTime, force):
 
-        self.posX += 0.5*force[0]*deltaTime**2/self.mass
-        self.posY += 0.5*force[1]*deltaTime**2/self.mass
+        dx = self.posX + 0.5*force[0]*deltaTime**2/self.mass
+        dy = self.posY + 0.5*force[1]*deltaTime**2/self.mass
+
+        if 0<dx<self.plane.sizeX:
+            self.posX = dx
+        
+        if 0<dy<self.plane.sizeY:
+            self.posY = dy
 
     def draw(self,screen):
-        pass
+        pygame.draw.circle(screen, (255,255,255), (self.posX*10,self.posY*10), 5)
