@@ -49,3 +49,4 @@ class dust:
         self.posY += 0.5*force[1]*deltaTime**2
 
     def draw(self,screen):
+        pass
