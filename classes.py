@@ -6,7 +6,7 @@ class plane:
 
     g = 1
 
-    def __init__(self, skewX:int = 0, skewY:int = 0, size:tuple[int,int] = (10,10), contents:list = []) -> None:
+    def __init__(self, size:tuple[int,int], skewX:int = 0, skewY:int = 0, contents:list = []) -> None:
         
         self.skewX = 0
         self.skewY = 0
@@ -15,7 +15,7 @@ class plane:
         self.forceY = 0
 
         self.sizeX, self.sizeY = size
-        self.plane = contents
+        self.contents = contents
 
     def setAngle(self, x, y):
         self.skewX, self.skewY = x, y
@@ -28,6 +28,8 @@ class plane:
         self.forceX = plane.g * math.sin(self.skewX)
         self.forceY = plane.g * math.sin(self.skewY)
 
+        return (self.forceX, self.forceY)
+
 
 class dust:
 
@@ -38,15 +40,15 @@ class dust:
         self.posX,self.posY = pos
         self.mass = mass
 
-        self.plane.append(self)
+        self.plane.contents.append(self)
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
         
     def updatePos(self, deltaTime, force):
 
-        self.posX += 0.5*force[0]*deltaTime**2
-        self.posY += 0.5*force[1]*deltaTime**2
+        self.posX += 0.5*force[0]*deltaTime**2/self.mass
+        self.posY += 0.5*force[1]*deltaTime**2/self.mass
 
     def draw(self,screen):
         pass
