@@ -102,6 +102,7 @@ class dust:
 
         if newPos in self.plane.positions:
             #Next collission
+            pass
                 
 
 

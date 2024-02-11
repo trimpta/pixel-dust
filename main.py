@@ -38,7 +38,8 @@ while True:
     for particle in surface.contents:
         particle.updatePos(deltaTime*2, force)
         particle.draw(screen)
-
+    
+    pygame.display.set_caption(f"pixel-dust | Trimpta | FPS: {0 if not deltaTime else 0.1/deltaTime:.0f}")
     surface.indicator(screen)
     pygame.display.update()
 
