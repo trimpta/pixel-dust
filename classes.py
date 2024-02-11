@@ -105,11 +105,12 @@ class dust:
         newPos = self.gridPos(x,y)
         if newPos in self.plane.positions:
 
-            if (dust.gridPos(newPos[0], self.posY)) in self.plane.positions:
-                y = self.posY
-
-            if (dust.gridPos(self.posX , newPos[1] )) in self.plane.positions:
+            if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
                 x = self.posX
+
+            if (dust.gridPos(self.posX , newPos[1] )) not in self.plane.positions:
+                y = self.posY
+                
 
 
         self.posX, self.posY = x, y
