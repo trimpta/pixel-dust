@@ -14,7 +14,7 @@ class plane:
         self.forceX = 0
         self.forceY = 0
 
-        self.sizeX, self.sizeY = size
+        self.sizeX, self.sizeY = size[0]/10, size[1]/10
         self.contents = contents
         self.positions = []
 
@@ -56,6 +56,9 @@ class plane:
         end_pos = (round( self.skewX * unitX + w/2 ), round( self.skewY * unitY + h/2 ))
         pygame.draw.line(screen,(110,100,110), center, (end_pos))
 
+    def updateSize(self, screen):
+        self.sizeX, self.sizeY = pygame.display.Info().current_w/10 , pygame.display.Info().current_h/10
+
 class dust:
 
     id = 0
@@ -75,8 +78,10 @@ class dust:
         else:
             self.color = (random.randint(30,255),random.randint(30,255),random.randint(30,255))
 
-
-        self.plane.contents.append(self)
+        if self.pos() not in self.plane.positions:
+            self.plane.contents.append(self)
+        else:
+            del self
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
@@ -103,13 +108,15 @@ class dust:
                 y = self.posY
 
         newPos = self.gridPos(x,y)
+        
         if newPos in self.plane.positions:
+            x, y = self.posX, self.posY
 
-            if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
-                x = self.posX
+            # if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
+            #     x = self.posX
 
-            if (dust.gridPos(self.posX , newPos[1] )) not in self.plane.positions:
-                y = self.posY
+            # if (dust.gridPos(self.posX , newPos[1] )) not in self.plane.positions:
+            #     y = self.posY
                 
 
 
