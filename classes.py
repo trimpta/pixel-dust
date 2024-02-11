@@ -33,6 +33,16 @@ class plane:
         self.skewX += y
         self.maxAngle()
 
+    def followMouse(self,screen):
+        w, h = pygame.display.Info().current_w, pygame.display.Info().current_h
+        unitX, unitY = (2*math.pi)/w, (2*math.pi)/w
+        
+        x = pygame.mouse.get_pos()[0] - w/2
+        y = pygame.mouse.get_pos()[1] - h/2
+
+        self.setAngle(x * unitX, y * unitY)
+        
+
     def force(self):
         self.forceX = plane.g * math.sin(self.skewX)
         self.forceY = plane.g * math.sin(self.skewY)
@@ -41,10 +51,9 @@ class plane:
     
     def indicator(self,screen):
         w, h = pygame.display.Info().current_w, pygame.display.Info().current_h
-        unitX, unitY = w/90, h/90
+        unitX, unitY = w/(2*math.pi), h/(2*math.pi)
         center = (round(w/2),round(h/2))
-
-        end_pos = (round(self.skewX*unitX+center[0]), round(self.skewY*unitY+center[1]))
+        end_pos = (round( self.skewX * unitX + w/2 ), round( self.skewY * unitY + h/2 ))
         pygame.draw.line(screen,(50,50,100), center, (end_pos))
 
 class dust:
@@ -64,7 +73,7 @@ class dust:
         if color:
             self.color = color
         else:
-            self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+            self.color = (random.randint(30,255),random.randint(30,255),random.randint(30,255))
 
 
         self.plane.contents.append(self)
@@ -75,34 +84,31 @@ class dust:
     def pos(self):
         return (math.floor(self.posX)*10,math.floor(self.posY)*10)
         
-    def updatePos(self, deltaTime, force, bug):
+    def updatePos(self, deltaTime, force):
 
-        velX = self.velX + 0.5*force[0]*deltaTime**2/self.mass * 1000
-        velY = self.velY + 0.5*force[1]*deltaTime**2/self.mass * 1000
+        velX = self.velX + 0.5*force[0]*deltaTime**2/self.mass * 100000
+        velY = self.velY + 0.5*force[1]*deltaTime**2/self.mass * 100000
 
-        x = self.posX + velX
-        y = self.posY + velY
+        x = self.posX + velX * deltaTime
+        y = self.posY + velY * deltaTime
 
-        if not 0.1<x<self.plane.sizeX-0.1:
+        if not 0.01<x<self.plane.sizeX-0.01: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
         
-        if not 0.1<y<self.plane.sizeY-0.1:
+        if not 0.01<y<self.plane.sizeY-0.01:
                 y = self.posY
 
         newPos = (math.floor(x)*10, math.floor(y)*10)
-        if bug:
-            print('update', self.id, newPos, self.plane.positions)
 
-        for position in self.plane.positions:
-            if position[1] == newPos:
-                self.plane.positions.append((self.id,self.pos()))
-                print('a',self.id,position[0],self.pos())
-                return
+        if newPos in self.plane.positions:
+            #Next collission
+                
+
 
         self.posX, self.posY = x, y
 
 
-        self.plane.positions.append((self.id,self.pos()))
+        self.plane.positions.append(self.pos())
 
     def draw(self,screen):
         x,y = self.pos()
