@@ -54,7 +54,7 @@ class plane:
         unitX, unitY = w/(2*math.pi), h/(2*math.pi)
         center = (round(w/2),round(h/2))
         end_pos = (round( self.skewX * unitX + w/2 ), round( self.skewY * unitY + h/2 ))
-        pygame.draw.line(screen,(50,50,100), center, (end_pos))
+        pygame.draw.line(screen,(110,100,110), center, (end_pos))
 
 class dust:
 
@@ -80,30 +80,36 @@ class dust:
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
-        
+
+    @staticmethod
+    def gridPos(x,y):
+        return (math.floor(x)*10,math.floor(y)*10)
+
     def pos(self):
         return (math.floor(self.posX)*10,math.floor(self.posY)*10)
         
     def updatePos(self, deltaTime, force):
 
-        velX = self.velX + 0.5*force[0]*deltaTime**2/self.mass * 100000
-        velY = self.velY + 0.5*force[1]*deltaTime**2/self.mass * 100000
+        velX = self.velX + force[0]*deltaTime/self.mass * 1000
+        velY = self.velY + force[1]*deltaTime/self.mass * 1000
 
         x = self.posX + velX * deltaTime
         y = self.posY + velY * deltaTime
 
-        if not 0.01<x<self.plane.sizeX-0.01: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
+        if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
         
         if not 0.01<y<self.plane.sizeY-0.01:
                 y = self.posY
 
-        newPos = (math.floor(x)*10, math.floor(y)*10)
-
+        newPos = self.gridPos(x,y)
         if newPos in self.plane.positions:
-            #Next collission
-            pass
-                
+
+            if (dust.gridPos(newPos[0], self.posY)) in self.plane.positions:
+                y = self.posY
+
+            if (dust.gridPos(self.posX , newPos[1] )) in self.plane.positions:
+                x = self.posX
 
 
         self.posX, self.posY = x, y
