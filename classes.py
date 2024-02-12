@@ -78,10 +78,7 @@ class dust:
         else:
             self.color = (random.randint(30,255),random.randint(30,255),random.randint(30,255))
 
-        if self.pos() not in self.plane.positions:
-            self.plane.contents.append(self)
-        else:
-            del self
+        self.plane.contents.append(self)
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
