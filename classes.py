@@ -82,6 +82,7 @@ class dust:
             self.plane.contents.append(self)
         else:
             del self
+            raise TypeError('Position occupied!!!')
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
@@ -98,8 +99,8 @@ class dust:
         velX = self.velX + force[0]*deltaTime/self.mass * 1000
         velY = self.velY + force[1]*deltaTime/self.mass * 1000
 
-        x = self.posX + velX * deltaTime
-        y = self.posY + velY * deltaTime
+        x = self.posX + velX * deltaTime  * 50
+        y = self.posY + velY * deltaTime  * 50
 
         if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX

@@ -1,12 +1,17 @@
+# /// script
+# dependencies = [
+#  "plyer",
+# ]
+# ///
+
 from classes import *
 import time
 import pygame
 import asyncio
-import plyer
-
 
 
 try:
+    import plyer
     plyer.accelerometer.enable()
     if plyer.accelerometer.acceleration[0] is None:
         accel = False
@@ -36,21 +41,27 @@ async def main():
                 break
 
             if event.type == pygame.KEYDOWN:
-                surface.contents = []
+
+                if event.key == pygame.K_SPACE:
+                    surface.contents = []
+                    
 
         if pygame.mouse.get_pressed()[0]:
             mX, mY = pygame.mouse.get_pos()
-            surface.contents.append(dust(surface, (mX/10, mY/10)))
+            try:
+                surface.contents.append(dust(surface, (mX/10, mY/10), mass= random.randint(10,100)/10))
+            except TypeError:
+                pass
 
         if accel:
-            surface.setAngle(plyer.accelerometer.acceleration[:-1])
+           force = plyer.accelerometer.get_acceleration()[:-1]
         else:
             surface.followMouse(surface)
+            force = surface.force()
 
         #Loop variables
         deltaTime = time.time() - previous_time
         previous_time = time.time()
-        force = surface.force()
         
         #Particle updates
         for particle in surface.contents:
