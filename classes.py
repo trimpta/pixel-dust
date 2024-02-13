@@ -70,6 +70,7 @@ class plane:
 class dust:
 
     id = 0
+    dampCollisions = 5
 
     def __init__(self, plane, pos:tuple[int,int], mass:int = 1, color:str = False, vel:tuple[int,int] = (0, 0)) -> None:
         
@@ -109,15 +110,19 @@ class dust:
         
         if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
+                self.velX *= -1 * dust.dampCollisions
         
         if not 0.01<y<self.plane.sizeY-0.01:
                 y = self.posY
+                self.velY *= -1 * dust.dampCollisions
 
         newPos = self.gridPos(x,y)
-        
-        if newPos in self.plane.positions:
+        for id, pos in enumerate(self.plane.positions):
+            if newPos == pos and id != self.id:
             
-            x, y = self.posX, self.posY
+                x, y = self.posX, self.posY
+                self.velX *= -1 * dust.dampCollisions
+                self.velY *= -1 * dust.dampCollisions
 
             # if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
             #     x = self.posX
