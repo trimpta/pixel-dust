@@ -11,6 +11,14 @@ screen = pygame.display.set_mode((width,height), flags= pygame.RESIZABLE)
 surface = plane((width/10,height/10))
 
 
+#block spawner
+for i in range(int((height-height/4)/10), int((height-height/4)/10)):
+    for j in range(int((width-width/4)/10), int((width-width/4)/10)):
+                print(i,j)
+                surface.contents.append(dust(surface, (j,i), random.randint(10,50)/10))
+        
+
+
 
 while True:
 
@@ -23,7 +31,7 @@ while True:
 
 
         if event.type == pygame.KEYDOWN:
-            surface.contents = []
+            surface.clear()
 
     if pygame.mouse.get_pressed()[0]:
         mX, mY = pygame.mouse.get_pos()
@@ -38,13 +46,10 @@ while True:
     force = surface.force()
     
     #Particle updates
-    for particle in surface.contents:
-        particle.updatePos(deltaTime, force)
-        particle.draw(screen)
+    surface.update(screen, deltaTime, force)
     
     pygame.display.set_caption(f"pixel-dust | trimpta | FPS: {clock.get_fps():.0f} | PC: {len(surface.contents)}")
     pygame.display.update()
     screen.fill((0,0,0))
 
-    surface.positions = []
     surface.updateSize(screen)

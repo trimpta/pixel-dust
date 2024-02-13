@@ -4,7 +4,7 @@ import pygame
 import random
 class plane:
 
-    g = 9.8
+    g = 98
 
     def __init__(self, size:tuple[int,int], skewX:int = 0, skewY:int = 0, contents:list = []) -> None:
         
@@ -16,7 +16,7 @@ class plane:
 
         self.sizeX, self.sizeY = size[0]/10, size[1]/10
         self.contents = contents
-        self.positions = []
+        self.positions = {}
 
     def maxAngle(self):
         self.skewX = 90 if self.skewX > 90 else self.skewX
@@ -41,7 +41,11 @@ class plane:
         y = pygame.mouse.get_pos()[1] - h/2
 
         self.setAngle(x * unitX, y * unitY)
-        
+
+    def update(self, screen, deltaTime, force):
+        for particle in self.contents:
+            particle.updatePos(deltaTime, force)
+            particle.draw(screen)     
 
     def force(self):
         self.forceX = plane.g * math.sin(self.skewX)
@@ -58,6 +62,10 @@ class plane:
 
     def updateSize(self, screen):
         self.sizeX, self.sizeY = pygame.display.Info().current_w/10 , pygame.display.Info().current_h/10
+
+    def clear(self):
+        self.contents = []
+        dust.id = 0
 
 class dust:
 
@@ -95,8 +103,8 @@ class dust:
         velX = self.velX + force[0]*deltaTime/self.mass * 1000
         velY = self.velY + force[1]*deltaTime/self.mass * 1000
 
-        x = self.posX + velX * deltaTime
-        y = self.posY + velY * deltaTime
+        x = self.posX + velX * deltaTime * 1000
+        y = self.posY + velY * deltaTime * 1000
 
         if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
@@ -106,7 +114,8 @@ class dust:
 
         newPos = self.gridPos(x,y)
         
-        if newPos in self.plane.positions:
+        if newPos in self.plane.positions.values():
+            
             x, y = self.posX, self.posY
 
             # if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
@@ -120,7 +129,7 @@ class dust:
         self.posX, self.posY = x, y
 
 
-        self.plane.positions.append(self.pos())
+        self.plane.positions[self.id] = self.pos()
 
     def draw(self,screen):
         x,y = self.pos()
