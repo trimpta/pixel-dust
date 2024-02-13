@@ -4,7 +4,7 @@ import pygame
 import random
 class plane:
 
-    g = 98
+    g = 9.8
 
     def __init__(self, size:tuple[int,int], skewX:int = 0, skewY:int = 0, contents:list = []) -> None:
         
@@ -16,7 +16,7 @@ class plane:
 
         self.sizeX, self.sizeY = size[0]/10, size[1]/10
         self.contents = contents
-        self.positions = {}
+        self.positions = []
 
     def maxAngle(self):
         self.skewX = 90 if self.skewX > 90 else self.skewX
@@ -87,6 +87,7 @@ class dust:
             self.color = (random.randint(30,255),random.randint(30,255),random.randint(30,255))
 
         self.plane.contents.append(self)
+        self.plane.positions.append(self.pos())
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
@@ -100,12 +101,12 @@ class dust:
         
     def updatePos(self, deltaTime, force):
 
-        velX = self.velX + force[0]*deltaTime/self.mass * 1000
-        velY = self.velY + force[1]*deltaTime/self.mass * 1000
+        velX = self.velX + force[0]*deltaTime/self.mass * 300
+        velY = self.velY + force[1]*deltaTime/self.mass * 300
 
-        x = self.posX + velX * deltaTime * 1000
-        y = self.posY + velY * deltaTime * 1000
-
+        x = self.posX + velX * deltaTime * 10
+        y = self.posY + velY * deltaTime * 10
+        
         if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
         
@@ -114,7 +115,7 @@ class dust:
 
         newPos = self.gridPos(x,y)
         
-        if newPos in self.plane.positions.values():
+        if newPos in self.plane.positions:
             
             x, y = self.posX, self.posY
 
@@ -130,6 +131,7 @@ class dust:
 
 
         self.plane.positions[self.id] = self.pos()
+        
 
     def draw(self,screen):
         x,y = self.pos()
