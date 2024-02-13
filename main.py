@@ -9,11 +9,10 @@ import time
 import pygame
 import asyncio
 
-
 try:
     import plyer
     plyer.accelerometer.enable()
-    if plyer.accelerometer.acceleration[0] is None:
+    if plyer.accelerometer.acceleration[0] == 0:
         accel = False
         raise ValueError
 
@@ -29,52 +28,61 @@ height, width = 700,700
 screen = pygame.display.set_mode((width,height), flags= pygame.RESIZABLE)
 surface = plane((width/10,height/10))
 
+clear_button = Button((50,10),(20,50),"clear", (150,150,150), (10,10,10), surface.clear)
+
+
+
+pygame.mouse.set_pos((height/2, width/2))
+
 
 async def main():
-    global previous_time, accel
+
+    global accel, previous_time
+
     while True:
 
         clock.tick()
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 break
 
-            if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_SPACE:
-                    surface.contents = []
-                    
+            if event.type == pygame.KEYDOWN:
+                surface.clear()
+
+            clear_button.handle_events(event)
+
+        clear_button.draw(screen)
 
         if pygame.mouse.get_pressed()[0]:
             mX, mY = pygame.mouse.get_pos()
-            try:
-                surface.contents.append(dust(surface, (mX/10, mY/10), mass= random.randint(10,100)/10))
-            except TypeError:
-                pass
-
-        if accel:
-           force = plyer.accelerometer.get_acceleration()[:-1]
-        else:
-            surface.followMouse(surface)
-            force = surface.force()
+            if dust.gridPos(mX/10, mY/10) not in  surface.positions:
+                surface.contents.append(dust(surface, (mX/10, mY/10),mass = random.randint(10, 30)/10))
 
         #Loop variables
         deltaTime = time.time() - previous_time
         previous_time = time.time()
         
-        #Particle updates
-        for particle in surface.contents:
-            particle.updatePos(deltaTime, force)
-            particle.draw(screen)
+        if accel:
+           force = plyer.accelerometer.get_acceleration()[:-1]
+        else:
+            surface.followMouse(surface)
+            force = surface.force()
         
-        pygame.display.set_caption(f"pixel-dust | trimpta | FPS: {clock.get_fps():.0f} | PC: {len(surface.contents)}")
+        #Particle updates
+        surface.update(screen, deltaTime , force)
+
+
         surface.indicator(screen)
-        surface.updateSize(screen)
+
+
+        pygame.display.set_caption(f"pixel-dust | trimpta | FPS: {clock.get_fps():.0f} | PC: {len(surface.contents)}")
         pygame.display.update()
         screen.fill((0,0,0))
 
-        surface.positions = []
+        surface.updateSize(screen)
 
         await asyncio.sleep(0)
 
