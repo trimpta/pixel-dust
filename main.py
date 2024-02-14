@@ -8,17 +8,16 @@ from classes import *
 import time
 import pygame
 import asyncio
+from button import Button
 
 try:
     import plyer
     plyer.accelerometer.enable()
-    if plyer.accelerometer.acceleration[0] == 0:
-        accel = False
-        raise ValueError
-
     accel = True
 except Exception as e:
     accel = False
+
+accel = True
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -66,7 +65,7 @@ async def main():
         previous_time = time.time()
         
         if accel:
-           force = plyer.accelerometer.get_acceleration()[:-1]
+           force = (-1 * plyer.accelerometer.get_acceleration()[0], plyer.accelerometer.get_acceleration()[1])
         else:
             surface.followMouse(surface)
             force = surface.force()

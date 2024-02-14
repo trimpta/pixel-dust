@@ -41,7 +41,11 @@ class plane:
         y = pygame.mouse.get_pos()[1] - h/2
 
         self.setAngle(x * unitX, y * unitY)
-        
+
+    def update(self, screen, deltaTime, force):
+        for particle in self.contents:
+            particle.updatePos(deltaTime, force)
+            particle.draw(screen)     
 
     def force(self):
         self.forceX = plane.g * math.sin(self.skewX)
@@ -59,9 +63,14 @@ class plane:
     def updateSize(self, screen):
         self.sizeX, self.sizeY = pygame.display.Info().current_w/10 , pygame.display.Info().current_h/10
 
+    def clear(self):
+        self.contents = []
+        dust.id = 0
+
 class dust:
 
     id = 0
+    dampCollisions = 5
 
     def __init__(self, plane, pos:tuple[int,int], mass:int = 1, color:str = False, vel:tuple[int,int] = (0, 0)) -> None:
         
@@ -78,11 +87,8 @@ class dust:
         else:
             self.color = (random.randint(30,255),random.randint(30,255),random.randint(30,255))
 
-        if self.pos() not in self.plane.positions:
-            self.plane.contents.append(self)
-        else:
-            del self
-            raise TypeError('Position occupied!!!')
+        self.plane.contents.append(self)
+        self.plane.positions.append(self.pos())
 
         if not (0<self.posX<self.plane.sizeX or 0<self.posY<self.plane.sizeY):
             raise ValueError('dust must be inside your plane!!!')
@@ -96,22 +102,27 @@ class dust:
         
     def updatePos(self, deltaTime, force):
 
-        velX = self.velX + force[0]*deltaTime/self.mass * 1000
-        velY = self.velY + force[1]*deltaTime/self.mass * 1000
+        velX = self.velX + force[0]*deltaTime/self.mass * 300
+        velY = self.velY + force[1]*deltaTime/self.mass * 300
 
-        x = self.posX + velX * deltaTime  * 50
-        y = self.posY + velY * deltaTime  * 50
-
+        x = self.posX + velX * deltaTime * 10
+        y = self.posY + velY * deltaTime * 10
+        
         if not 0.1<x<self.plane.sizeX-0.1: #i wasted 4 hours here trying to fix collission and all i had to do was use 0.01 instead of 0.1 kms
                 x = self.posX
+                self.velX *= -1 * dust.dampCollisions
         
         if not 0.01<y<self.plane.sizeY-0.01:
                 y = self.posY
+                self.velY *= -1 * dust.dampCollisions
 
         newPos = self.gridPos(x,y)
-        
-        if newPos in self.plane.positions:
-            x, y = self.posX, self.posY
+        for id, pos in enumerate(self.plane.positions):
+            if newPos == pos and id != self.id:
+            
+                x, y = self.posX, self.posY
+                self.velX *= -1 * dust.dampCollisions
+                self.velY *= -1 * dust.dampCollisions
 
             # if (dust.gridPos(newPos[0], self.posY)) not in self.plane.positions:
             #     x = self.posX
@@ -124,7 +135,8 @@ class dust:
         self.posX, self.posY = x, y
 
 
-        self.plane.positions.append(self.pos())
+        self.plane.positions[self.id] = self.pos()
+        
 
     def draw(self,screen):
         x,y = self.pos()
