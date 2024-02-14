@@ -17,7 +17,6 @@ try:
 except Exception as e:
     accel = False
 
-accel = True
 
 pygame.init()
 clock = pygame.time.Clock()
