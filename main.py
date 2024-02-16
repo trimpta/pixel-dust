@@ -8,7 +8,6 @@ from classes import *
 import time
 import pygame
 import asyncio
-from button import Button
 
 try:
     import plyer
@@ -24,9 +23,9 @@ clock = pygame.time.Clock()
 previous_time = time.time()
 height, width = 700,700
 screen = pygame.display.set_mode((width,height), flags= pygame.RESIZABLE)
-surface = plane((width/10,height/10))
+surface = plane((width/10,height/10), screen=screen)
 
-clear_button = Button((50,10),(20,50),"clear", (150,150,150), (10,10,10), surface.clear)
+clear_button = Button((50,10),(80,40),"clear", (150,150,150), (5,10,30), surface.clear)
 
 
 
@@ -52,12 +51,9 @@ async def main():
 
             clear_button.handle_events(event)
 
-        clear_button.draw(screen)
-
         if pygame.mouse.get_pressed()[0]:
             mX, mY = pygame.mouse.get_pos()
-            if dust.gridPos(mX/10, mY/10) not in  surface.positions:
-                surface.contents.append(dust(surface, (mX/10, mY/10),mass = random.randint(10, 30)/10))
+            surface.contents.append(dust(surface, (mX/10, mY/10),mass = random.randint(10, 30)/10))
 
         #Loop variables
         deltaTime = time.time() - previous_time
@@ -66,21 +62,21 @@ async def main():
         if accel:
            force = (-1 * plyer.accelerometer.get_acceleration()[0], plyer.accelerometer.get_acceleration()[1])
         else:
-            surface.followMouse(surface)
+            surface.followMouse()
             force = surface.force()
+
+        clear_button.draw(screen)
+        surface.drawGrid()
+        surface.indicator()
         
         #Particle updates
-        surface.update(screen, deltaTime , force)
-
-
-        surface.indicator(screen)
-
+        surface.update(deltaTime , force)
 
         pygame.display.set_caption(f"pixel-dust | trimpta | FPS: {clock.get_fps():.0f} | PC: {len(surface.contents)}")
         pygame.display.update()
-        screen.fill((0,0,0))
+        screen.fill((5,1,20))
 
-        surface.updateSize(screen)
+        surface.updateSize()
 
         await asyncio.sleep(0)
 

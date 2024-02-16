@@ -2,11 +2,13 @@
 import math
 import pygame
 import random
+from typing import Tuple, Union
+
 class plane:
 
     g = 9.8
 
-    def __init__(self, size:tuple[int,int], skewX:int = 0, skewY:int = 0, contents:list = []) -> None:
+    def __init__(self, size:tuple[int,int], screen, skewX:int = 0, skewY:int = 0, contents:list = []) -> None:
         
         self.skewX = 0
         self.skewY = 0
@@ -15,6 +17,9 @@ class plane:
         self.forceY = 0
 
         self.sizeX, self.sizeY = size[0]/10, size[1]/10
+        self.screenW, self.screenH = pygame.display.Info().current_w, pygame.display.Info().current_h
+        self.screen = screen
+
         self.contents = contents
         self.positions = []
 
@@ -33,19 +38,18 @@ class plane:
         self.skewX += y
         self.maxAngle()
 
-    def followMouse(self,screen):
-        w, h = pygame.display.Info().current_w, pygame.display.Info().current_h
-        unitX, unitY = (2*math.pi)/w, (2*math.pi)/w
+    def followMouse(self):
+        unitX, unitY = (2*math.pi)/self.screenW, (2*math.pi)/self.screenH
         
-        x = pygame.mouse.get_pos()[0] - w/2
-        y = pygame.mouse.get_pos()[1] - h/2
+        x = pygame.mouse.get_pos()[0] - self.screenW/2
+        y = pygame.mouse.get_pos()[1] - self.screenH/2
 
         self.setAngle(x * unitX, y * unitY)
 
-    def update(self, screen, deltaTime, force):
+    def update(self, deltaTime, force):
         for particle in self.contents:
             particle.updatePos(deltaTime, force)
-            particle.draw(screen)     
+            particle.draw(self.screen)     
 
     def force(self):
         self.forceX = plane.g * math.sin(self.skewX)
@@ -53,14 +57,21 @@ class plane:
 
         return (self.forceX, self.forceY)
     
-    def indicator(self,screen):
+    def indicator(self):
         w, h = pygame.display.Info().current_w, pygame.display.Info().current_h
         unitX, unitY = w/(2*math.pi), h/(2*math.pi)
         center = (round(w/2),round(h/2))
         end_pos = (round( self.skewX * unitX + w/2 ), round( self.skewY * unitY + h/2 ))
-        pygame.draw.line(screen,(110,100,110), center, (end_pos))
+        pygame.draw.line(self.screen,(110,100,110), center, (end_pos))
 
-    def updateSize(self, screen):
+    def drawGrid(self):
+        for i in range(0,self.screenW, 10):
+            pygame.draw.line(self.screen, (0,10,30), (i,0), (i,self.screenH))
+
+        for i in range(0,self.screenH, 10):
+            pygame.draw.line(self.screen, (0,10,30), (0, i), (self.screenW, i))
+
+    def updateSize(self):
         self.sizeX, self.sizeY = pygame.display.Info().current_w/10 , pygame.display.Info().current_h/10
 
     def clear(self):
@@ -140,4 +151,48 @@ class dust:
 
     def draw(self,screen):
         x,y = self.pos()
-        pygame.draw.rect(screen, self.color,(x,y,10,10))
+        pygame.draw.rect(screen, self.color,(x,y,10,10),5,2)
+
+
+class Button:
+    def __init__(
+        self,
+        pos: Tuple[int, int],
+        size: Tuple[int, int],
+        text: str,
+        text_color: Union[str, Tuple[int, int, int]],
+        bg_color: Union[str, Tuple[int, int, int]],
+        method: callable = lambda: None,
+    ) -> None:
+        self.rect = pygame.Rect(pos, size)
+        self.font = pygame.font.SysFont("Arial", size[1])
+        self.text_surf = self.font.render(text, False, text_color)
+
+        self.color = bg_color
+        self.text = text
+        self.func = method
+
+        self._text_pos = self.text_surf.get_rect(center=self.rect.center).topleft
+
+        self._is_pressed = False
+
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draws the pygame.Rect and font"""
+        pygame.draw.rect(surface, self.color, self.rect)
+        surface.blit(
+            self.text_surf,
+            self._text_pos,
+        )
+
+    def handle_events(self, event: pygame.event.Event) -> None:
+        """Put this inside of your event loop"""
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1 and self.rect.collidepoint(event.pos):
+                self._is_pressed = True
+            else:
+                self._is_pressed = False
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if self._is_pressed and self.rect.collidepoint(event.pos):
+                self.func()
+            self._is_pressed = False
