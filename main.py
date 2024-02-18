@@ -12,18 +12,25 @@ import asyncio
 try:
     import plyer
     plyer.accelerometer.enable()
-    accel = True
+    accel = False
+    for _ in range(25):
+        if plyer.accelerometer.get_acceleration()[0] != plyer.accelerometer.get_acceleration()[1]:
+            accel = True
+            break
+            
 except Exception as e:
     accel = False
 
+#F this i quit
+accel = True
 
 pygame.init()
 clock = pygame.time.Clock()
 
 previous_time = time.time()
 height, width = 700,700
-screen = pygame.display.set_mode((width,height), flags= pygame.RESIZABLE)
-surface = plane((width/10,height/10), screen=screen)
+screen = pygame.display.set_mode((width,height), flags = pygame.RESIZABLE)
+surface = plane((width/10,height/10), screen = screen)
 
 clear_button = Button((50,10),(80,40),"clear", (150,150,150), (5,10,30), surface.clear)
 
