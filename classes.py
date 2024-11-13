@@ -64,7 +64,8 @@ class plane:
         self.sizeX, self.sizeY = pygame.display.Info().current_w/10 , pygame.display.Info().current_h/10
 
     def clear(self):
-        self.contents = []
+        for dust in self.contents:
+            del dust
         dust.id = 0
 
 class dust:
