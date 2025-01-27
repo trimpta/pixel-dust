@@ -76,6 +76,7 @@ class plane:
 
     def clear(self):
         self.contents = []
+        self.positions = []
         dust.id = 0
 
 class dust:
