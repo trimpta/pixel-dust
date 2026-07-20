@@ -38,7 +38,7 @@ clear_button = Button((50,10),(80,40),"clear", (150,150,150), (5,10,30), surface
 
 pygame.mouse.set_pos((height/2, width/2))
 
-
+last_touched = time.time()
 async def main():
 
     global accel, previous_time
@@ -59,8 +59,10 @@ async def main():
             clear_button.handle_events(event)
 
         if pygame.mouse.get_pressed()[0]:
-            mX, mY = pygame.mouse.get_pos()
-            surface.contents.append(dust(surface, (mX/10, mY/10),mass = random.randint(10, 30)/10))
+            if time.time() - last_touched >= 0.03:
+                mX, mY = pygame.mouse.get_pos()
+                surface.contents.append(dust(surface, (mX/10, mY/10),mass = random.randint(10, 30)/10))
+                last_touched = time.time()
 
         #Loop variables
         deltaTime = time.time() - previous_time
