@@ -11,7 +11,7 @@ screen = pygame.display.set_mode((width,height), flags= pygame.RESIZABLE)
 surface = plane((width/10,height/10))
 
 
-
+last_dust = time.time()
 while True:
 
     clock.tick()
@@ -26,8 +26,10 @@ while True:
             surface.contents = []
 
     if pygame.mouse.get_pressed()[0]:
-        mX, mY = pygame.mouse.get_pos()
-        surface.contents.append(dust(surface, (mX/10, mY/10), random.randint(10,50)/10))
+        if time.time() - last_dust >= 0.03:
+            mX, mY = pygame.mouse.get_pos()
+            surface.contents.append(dust(surface, (mX/10, mY/10), random.randint(10,50)/10))
+            last_dust = time.time()
 
     surface.followMouse(surface)
     surface.indicator(screen)
